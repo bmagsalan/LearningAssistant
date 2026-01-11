@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_txt1->setText("Making a Raspberry Pi web application.");
     QPushButton* m_btn1 = new QPushButton("Speak",root);
     QPushButton* m_btn2 = new QPushButton("Stop",root);
-    QLineEdit* m_ln1 = new QLineEdit("Status: Stopped",root);
+    QLabel* m_ln1 = new QLabel("Status: Stopped",root);
     grid->addWidget(m_txt1,0,0,1,2);
     grid->addWidget(m_btn1,1,0);
     grid->addWidget(m_btn2,1,1);

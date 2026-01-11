@@ -8,11 +8,11 @@ TtsViewModel::TtsViewModel(QObject *parent)
     m_tts = new PiperTtsService(this);
 
     connect(m_tts,&PiperTtsService::speakingStarted,this,[this](){
-        if(!m_speaking)
-        {
-            m_speaking = true;
-            emit speakingChanged(m_speaking);
-        }
+        // if(!m_speaking)
+        // {
+        //     m_speaking = true;
+        //     emit speakingChanged(m_speaking);
+        // }
 
     });
     connect(m_tts,&PiperTtsService::speakingFinished,this,[this](){
@@ -31,6 +31,12 @@ TtsViewModel::TtsViewModel(QObject *parent)
 
 void TtsViewModel::speak(const QString& text)
 {
+    if(m_speaking)
+        return;
+
+    m_speaking = true;
+    emit speakingChanged(m_speaking);
+
     if (text.trimmed().isEmpty())
         return;
 

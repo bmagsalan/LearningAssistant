@@ -156,6 +156,9 @@ void PiperTtsService::speak(const QString &text)
 void PiperTtsService::stop()
 {
     cleanup();
+
+    startedEmitted = false;
+    emit speakingFinished();   // 🔥 playback truly finished
 }
 
 bool PiperTtsService::isSpeaking() const
