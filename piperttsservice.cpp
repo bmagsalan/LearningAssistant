@@ -166,6 +166,7 @@ bool PiperTtsService::isSpeaking() const
     return m_proc && m_proc->state() == QProcess::Running;
 }
 
+
 // -------------------------------------------------
 // Cleanup
 // -------------------------------------------------
