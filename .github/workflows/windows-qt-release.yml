@@ -1,0 +1,67 @@
+name: Windows Qt Release (MSVC 2019 x64)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-2019
+
+    steps:
+      # -----------------------------
+      # Checkout source
+      # -----------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------
+      # Install Qt 6.7.3 (MSVC 2019 x64)
+      # -----------------------------
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.7.3
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+
+      # -----------------------------
+      # Configure CMake
+      # -----------------------------
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build `
+            -G "Visual Studio 16 2019" `
+            -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
+
+      # -----------------------------
+      # Build
+      # -----------------------------
+      - name: Build
+        run: |
+          cmake --build build --config Release
+
+      # -----------------------------
+      # Tar the entire Release folder
+      # -----------------------------
+      - name: Package Release folder
+        run: |
+          tar -C build -czf Release-windows-msvc2019-x64.tar.gz Release
+
+      # -----------------------------
+      # Create GitHub Release
+      # -----------------------------
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Release-windows-msvc2019-x64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
