@@ -51,10 +51,31 @@ jobs:
           cmake --build build --config Release
 
       # -----------------------------
+      # Deploy Qt artifacts (The Fix)
+      # -----------------------------
+      - name: Deploy Qt artifacts
+        shell: powershell
+        run: |
+          # Find the executable automatically
+          $exePath = Get-ChildItem -Path build\Release\*.exe | Select-Object -First 1
+          
+          if (-not $exePath) {
+            Write-Error "Executable not found in build/Release!"
+            exit 1
+          }
+
+          Write-Host "Running windeployqt on: $($exePath.FullName)"
+          
+          # Run windeployqt to copy DLLs and plugins to the folder
+          # --compiler-runtime copies MSVC runtimes (vcruntime140.dll etc) so users don't need to install them manually
+          windeployqt --release --compiler-runtime --no-translations $exePath.FullName
+
+      # -----------------------------
       # Tar the entire Release folder
       # -----------------------------
       - name: Package Release folder
         run: |
+          # The DLLs are now inside build/Release, so this will package them
           tar -C build -czf Release-windows-msvc2019-x64.tar.gz Release
 
       # -----------------------------
