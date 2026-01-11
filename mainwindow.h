@@ -3,17 +3,19 @@
 
 #include <QtWidgets/QtWidgets>
 
-class ControllerTts;
+
+
+class TtsViewModel;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
 
+    ~MainWindow();
 private:
-    ControllerTts* tts = nullptr;
-    QThread* ttsThread = nullptr;
+    TtsViewModel* m_vm = nullptr;
+    QTextEdit* m_txt1 = nullptr;
 };
+
 #endif // MAINWINDOW_H
