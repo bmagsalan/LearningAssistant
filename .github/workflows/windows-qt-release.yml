@@ -51,15 +51,7 @@ jobs:
           cmake --build build --config Release
 
       # -----------------------------
-      # Deploy Qt DLLs (CRITICAL FIX)
-      # -----------------------------
-      - name: Deploy Qt DLLs into Release folder
-        run: |
-          cd build\Release
-          & "${{ env.Qt6_DIR }}\bin\windeployqt.exe" *.exe
-
-      # -----------------------------
-      # Package Release folder
+      # Tar the entire Release folder
       # -----------------------------
       - name: Package Release folder
         run: |
