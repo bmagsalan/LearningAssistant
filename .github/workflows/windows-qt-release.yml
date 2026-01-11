@@ -13,15 +13,9 @@ jobs:
     runs-on: windows-2019
 
     steps:
-      # -----------------------------
-      # Checkout source
-      # -----------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # -----------------------------
-      # Install Qt 6.7.3 (MSVC 2019 x64)
-      # -----------------------------
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -32,9 +26,6 @@ jobs:
           modules: qt5compat qtmultimedia
           cache: true
 
-      # -----------------------------
-      # Configure CMake
-      # -----------------------------
       - name: Configure CMake
         run: |
           cmake -S . -B build `
@@ -43,47 +34,55 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
 
-      # -----------------------------
-      # Build
-      # -----------------------------
       - name: Build
         run: |
           cmake --build build --config Release
 
-      # -----------------------------
-      # Deploy Qt artifacts (The Fix)
-      # -----------------------------
-      - name: Deploy Qt artifacts
+      # ---------------------------------------------------------
+      # Detect App Name & Deploy Qt DLLs
+      # ---------------------------------------------------------
+      - name: Deploy Qt artifacts & Detect Name
         shell: powershell
         run: |
-          # Find the executable automatically
+          # 1. Find the built executable
           $exePath = Get-ChildItem -Path build\Release\*.exe | Select-Object -First 1
           
           if (-not $exePath) {
-            Write-Error "Executable not found in build/Release!"
+            Write-Error "Executable not found! Build might have failed."
             exit 1
           }
 
-          Write-Host "Running windeployqt on: $($exePath.FullName)"
-          
-          # Run windeployqt to copy DLLs and plugins to the folder
-          # --compiler-runtime copies MSVC runtimes (vcruntime140.dll etc) so users don't need to install them manually
+          # 2. Extract the name (e.g., "MyAutoName.exe" -> "MyAutoName")
+          $appName = $exePath.BaseName
+          Write-Host "Detected App Name from CMake build: $appName"
+
+          # 3. Save to GitHub Environment so subsequent steps can see ${{ env.APP_NAME }}
+          "APP_NAME=$appName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          # 4. Run windeployqt
           windeployqt --release --compiler-runtime --no-translations $exePath.FullName
 
-      # -----------------------------
-      # Tar the entire Release folder
-      # -----------------------------
+      # ---------------------------------------------------------
+      # Package using the detected name
+      # ---------------------------------------------------------
       - name: Package Release folder
+        shell: powershell
         run: |
-          # The DLLs are now inside build/Release, so this will package them
-          tar -C build -czf Release-windows-msvc2019-x64.tar.gz Release
+          # Use the detected name to build the zip filename
+          $filename = "${{ env.APP_NAME }}-${{ github.ref_name }}-windows-msvc2019-x64.tar.gz"
+          
+          Write-Host "Packaging $filename..."
+          
+          # Rename 'Release' folder to the App Name so the user sees a nice folder when unzipping
+          Rename-Item -Path "build\Release" -NewName "${{ env.APP_NAME }}"
+          
+          # Create the tarball
+          tar -C build -czf $filename "${{ env.APP_NAME }}"
 
-      # -----------------------------
-      # Create GitHub Release
-      # -----------------------------
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: Release-windows-msvc2019-x64.tar.gz
+          # This reads the specific file we created above
+          files: ${{ env.APP_NAME }}-${{ github.ref_name }}-windows-msvc2019-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
