@@ -23,7 +23,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2019_64
-          modules: qt5compat qtmultimedia qtwebengine
+          modules: qt5compat qtmultimedia qtwebengine qtwebchannel
           cache: true
 
       - name: Configure CMake
