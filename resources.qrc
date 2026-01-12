@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>js/extract_article.js</file>
+        <file>js/Readability.js</file>
+    </qresource>
+</RCC>

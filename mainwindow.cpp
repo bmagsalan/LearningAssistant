@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 
 #include "ttsviewmodel.h"
+
+#include "articleextractor.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -11,15 +13,21 @@ MainWindow::MainWindow(QWidget *parent)
     QGridLayout* grid = new QGridLayout(root);
 
     m_txt1 = new QTextEdit(root);
-    // m_txt1->setText("Making a Raspberry Pi web application \"portable\" usually involves two distinct goals: Software Portability (easy to deploy on other Pis) and Operational Portability (turning the Pi into a standalone \"appliance\" you can carry around and use anywhere). Given your stack (uStreamer + Flask + Hardware Access), Docker is the industry standard for the software side, while Access Point Mode is the standard for the operational side. Here is the step-by-step guide to making your system portable.");
     m_txt1->setText("Making a Raspberry Pi web application.");
+
+
     QPushButton* m_btn1 = new QPushButton("Speak",root);
     QPushButton* m_btn2 = new QPushButton("Stop",root);
-    QLabel* m_ln1 = new QLabel("Status: Stopped",root);
-    grid->addWidget(m_txt1,0,0,1,2);
-    grid->addWidget(m_btn1,1,0);
-    grid->addWidget(m_btn2,1,1);
-    grid->addWidget(m_ln1,2,0,1,2);
+    QLabel* m_lbl1 = new QLabel("Status: Stopped",root);
+    QLineEdit* m_ln1 = new QLineEdit("https://www.geeksforgeeks.org/system-design/software-design-patterns/",root);
+    QPushButton* m_btn3 = new QPushButton("Send",root);
+
+    grid->addWidget(m_ln1,0,0);
+    grid->addWidget(m_btn3,0,1);
+    grid->addWidget(m_txt1,1,0,1,2);
+    grid->addWidget(m_btn1,2,0);
+    grid->addWidget(m_btn2,2,1);
+    grid->addWidget(m_lbl1,3,0,1,2);
 
     setCentralWidget(root);
 
@@ -34,10 +42,24 @@ MainWindow::MainWindow(QWidget *parent)
             m_vm->stop();
     });
 
-    connect(m_vm,&TtsViewModel::speakingChanged,[m_ln1](bool speaking){
-        m_ln1->setText(QString("Status: %1").arg(speaking ? "Speaking" : "Stopped"));
+    connect(m_vm,&TtsViewModel::htmlReceived,this,[this](const QString& output){
+        // m_browser->setHtml(output);
+        m_txt1->setHtml(output);
+
+        QApplication::restoreOverrideCursor();
+    });
+
+    connect(m_btn3,&QPushButton::clicked,this,[this,m_ln1](){
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        m_txt1->setHtml("<i>Loading article…</i>");
+        m_vm->sendHtmlRequest(QUrl(m_ln1->text()));
+    });
+
+    connect(m_vm,&TtsViewModel::speakingChanged,[m_lbl1](bool speaking){
+        m_lbl1->setText(QString("Status: %1").arg(speaking ? "Speaking" : "Stopped"));
 
     });
+
 
 
 

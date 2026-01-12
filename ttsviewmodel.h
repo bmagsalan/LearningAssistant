@@ -5,6 +5,8 @@
 
 
 class PiperTtsService;
+class NetworkModel;
+class ArticleExtractor;
 class TtsViewModel : public QObject
 {
     Q_OBJECT
@@ -17,13 +19,17 @@ public:
     Q_INVOKABLE void stop();
     Q_INVOKABLE bool speaking() const;
 
+    Q_INVOKABLE void sendHtmlRequest(QUrl htmAddress);
 signals:
     void speakingChanged(bool);
+    void htmlReceived(const QString& msg);
     void errorOccurred(const QString& msg);
 private:
     bool m_speaking = false;
     PiperTtsService* m_tts = nullptr;
-
+    NetworkModel* m_net = nullptr;
+    ArticleExtractor* extractor = nullptr;
 };
 
 #endif // TTSVIEWMODEL_H
+

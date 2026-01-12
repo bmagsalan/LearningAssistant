@@ -2,11 +2,20 @@
 
 #include <QApplication>
 
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QLabel lbl;
+
     MainWindow w;
-    w.resize(1280,720);
+    w.resize(800,600);
     w.show();
+
     return a.exec();
 }
+
+#include "main.moc"
+
+

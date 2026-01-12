@@ -16,6 +16,7 @@ public:
 private:
     TtsViewModel* m_vm = nullptr;
     QTextEdit* m_txt1 = nullptr;
+
 };
 
 #endif // MAINWINDOW_H
